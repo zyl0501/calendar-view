@@ -36,7 +36,6 @@ public class MonthLayout extends View {
      * 二级长度固定为7（一周），表示对应的日期
      */
     Cell[][] dates;
-    int selectDay;
 
     Paint weekLabelPaint;
     Paint textPaint;
@@ -59,13 +58,19 @@ public class MonthLayout extends View {
     int weekLabelHeight;
     boolean autoWeekLabelHeight;
     boolean showWeekLabel;
+    /**
+     * 是否显示临近月份的日期
+     */
+    boolean showRelativeMonth;
     //可以显示多少周
     int weeks;
     CharSequence[] weekTexts;
 
     Calendar todayCal;
+    Calendar selectCal;
 
     CallBack callBack;
+    InitListener initListener;
     ItemClickListener itemClickListener;
     GestureDetector gestureDetector;
 
@@ -102,6 +107,8 @@ public class MonthLayout extends View {
             dotMargin = a.getDimensionPixelOffset(R.styleable.MonthLayout_ml_dotMargin, Utils.getDimen(context, R.dimen.ml_dotMargin));
             dotMarginText = a.getDimensionPixelOffset(R.styleable.MonthLayout_ml_dotMarginText, Utils.getDimen(context, R.dimen.ml_dotMarginText));
             firstWeek = a.getInt(R.styleable.MonthLayout_ml_firstWeek, Calendar.SUNDAY);
+            showWeekLabel = a.getBoolean(R.styleable.MonthLayout_ml_showWeekLabel, false);
+            showRelativeMonth = a.getBoolean(R.styleable.MonthLayout_ml_showRelativeMonth, false);
             weekLabelHeight = a.getDimensionPixelOffset(R.styleable.MonthLayout_ml_weekLabelHeight, -1);
             weekTexts = a.getTextArray(R.styleable.MonthLayout_ml_weeksArray);
             if (weekTexts == null) {
@@ -119,6 +126,8 @@ public class MonthLayout extends View {
             dotMargin = Utils.getDimen(context, R.dimen.ml_dotMargin);
             dotMarginText = Utils.getDimen(context, R.dimen.ml_dotMarginText);
             firstWeek = Calendar.SUNDAY;
+            showWeekLabel = false;
+            showRelativeMonth = false;
             weekLabelHeight = -1;
             weekTexts = context.getResources().getTextArray(R.array.ml_weeks);
         }
@@ -131,11 +140,11 @@ public class MonthLayout extends View {
         weekLabelPaint.setColor(weekLabelTextColor);
         weekLabelPaint.setAntiAlias(true);
 
-        showWeekLabel = true;
         autoCellSize = cellSize == -1;
         autoWeekLabelHeight = weekLabelHeight == -1;
         fontMetrics = textPaint.getFontMetrics();
         todayCal = Calendar.getInstance();
+        selectCal = Calendar.getInstance();
         gestureDetector = new GestureDetector(context, new GestureListener());
     }
 
@@ -155,6 +164,42 @@ public class MonthLayout extends View {
         int bottom = canvas.getHeight() - getPaddingBottom();
         int validWidth = right - left;
         int validHeight = bottom - top;
+        calculateAutoSize(validWidth, validHeight);
+        int cellValidHeight = validHeight - getWeekLabelShowHeight();
+
+        int transStepX = getStepX(validWidth);
+        int transStepY = getStepY(cellValidHeight);
+
+        int s1 = canvas.save();
+        canvas.translate(left, top);
+
+        if (showWeekLabel) {
+            drawWeekText(canvas);
+            canvas.translate(0, weekLabelHeight);
+        }
+
+        int row = 0;
+        int column = 0;
+        for (Cell[] weekDays : dates) {
+            int saveRow = canvas.save();
+            canvas.translate(0, row * transStepY);
+            for (Cell day : weekDays) {
+                boolean isNotCurrentMonth = day.year != year || day.month != month;
+                if (!showRelativeMonth && isNotCurrentMonth) {
+                    canvas.translate(transStepX, 0);
+                    continue;
+                }
+                drawCellBox(canvas, day);
+                drawDots(canvas, day);
+                canvas.translate(transStepX, 0);
+            }
+            canvas.restoreToCount(saveRow);
+            row++;
+        }
+        canvas.restoreToCount(s1);
+    }
+
+    private void calculateAutoSize(int validWidth, int validHeight) {
         // weekLabelHeight 为-1，跟每行高度一致
         if (weekLabelHeight == -1) {
             if (cellSize == -1) {
@@ -174,41 +219,16 @@ public class MonthLayout extends View {
             int heightExpireSize = cellValidHeight / weeks * 4 / 5;
             cellSize = Math.min(widthExpireSize, heightExpireSize);
         }
-
-        int transStepX = getStepX(validWidth);
-        int transStepY = getStepY(cellValidHeight);
-
-        int s1 = canvas.save();
-        canvas.translate(left, top);
-
-        if (showWeekLabel) {
-            drawWeekText(canvas);
-            canvas.translate(0, weekLabelHeight);
-        }
-
-        int row = 0;
-        int column = 0;
-        for (Cell[] weekDays : dates) {
-            int saveRow = canvas.save();
-            canvas.translate(0, row * transStepY);
-            for (Cell day : weekDays) {
-                drawCellBox(canvas, day);
-                drawDots(canvas, day);
-                canvas.translate(transStepX, 0);
-            }
-            canvas.restoreToCount(saveRow);
-            row++;
-        }
-        canvas.restoreToCount(s1);
     }
 
-    private void drawWeekText(Canvas canvas) {
+    void drawWeekText(Canvas canvas) {
         if (weekTexts == null || weekTexts.length != WEEK_COUNT) {
             Log.w(TAG, "week text array is invalid, must be array of 7 size.\nArray must be first of sunday.");
             return;
         }
         int validWidth = getMeasuredWidth() - getPaddingLeft() - getPaddingRight();
         int validHeight = getMeasuredHeight() - getPaddingTop() - getPaddingBottom();
+        calculateAutoSize(validWidth, validHeight);
 
         int centerX = cellSize / 2;
         int centerY = weekLabelHeight / 2;
@@ -234,7 +254,9 @@ public class MonthLayout extends View {
             cellBgPaint.setStyle(Paint.Style.FILL);
             canvas.drawCircle(halfSize, halfSize, halfSize, cellBgPaint);
             Utils.drawCenterText(String.valueOf(day.day), canvas, halfSize, halfSize, textPaint);
-        } else if (day.year == year && day.month == month && day.day == selectDay) {
+        } else if (day.year == selectCal.get(Calendar.YEAR)
+                && day.month == selectCal.get(Calendar.MONTH)
+                && day.day == selectCal.get(Calendar.DAY_OF_MONTH)) {
             //选中状态
             cellBgPaint.setStyle(Paint.Style.STROKE);
             cellBgPaint.setColor(primaryColor);
@@ -287,6 +309,24 @@ public class MonthLayout extends View {
         }
     }
 
+    int getWeekLabelSuggestHeight(int validWidth, int validHeight) {
+        if (weekLabelHeight == -1) {
+            if (cellSize == -1) {
+                int widthExpireSize = validWidth / WEEK_COUNT * 4 / 5;
+                int heightExpireSize = validHeight / (weeks + 1) * 4 / 5;
+                int tempCellSize = Math.min(widthExpireSize, heightExpireSize);
+                if (dates == null) {
+                    weekLabelHeight = tempCellSize;
+                } else {
+                    weekLabelHeight = dates.length == 1 ? validHeight / 2 : (validHeight - tempCellSize) / dates.length;
+                }
+            } else {
+                weekLabelHeight = getStepY(validHeight);
+            }
+        }
+        return weekLabelHeight;
+    }
+
     private boolean isToday(Cell day) {
         int currentYear = todayCal.get(Calendar.YEAR);
         int currentMonth = todayCal.get(Calendar.MONTH);
@@ -294,10 +334,9 @@ public class MonthLayout extends View {
         return day.year == currentYear && day.month == currentMonth && day.day == currentDay;
     }
 
-    public void setDate(int year, int month, int selectDay) {
+    public void setDate(int year, int month) {
         this.year = year;
         this.month = month;
-        this.selectDay = selectDay;
         if (calendar == null) {
             calendar = Calendar.getInstance();
         }
@@ -325,7 +364,6 @@ public class MonthLayout extends View {
                 calendar.add(Calendar.DAY_OF_MONTH, 1);
             }
         }
-        this.selectDay = selectDay;
         if (autoCellSize) {
             cellSize = -1;
         }
@@ -339,17 +377,10 @@ public class MonthLayout extends View {
     }
 
     /**
-     * 年月为当前控件显示的值
-     *
-     * @param selectDay 选中的天
+     * 设置当前选中的年月日
      */
-    public void setSelectDay(int selectDay) {
-        setDate(year, month, selectDay);
-        invalidate();
-    }
-
-    public void setDate(int year, int month) {
-        setDate(year, month, selectDay);
+    public void setSelectDay(int year, int month, int day) {
+        selectCal.set(year, month, day);
         invalidate();
     }
 
@@ -400,7 +431,7 @@ public class MonthLayout extends View {
         public boolean onSingleTapUp(MotionEvent e) {
             if (dayCell != null) {
                 if (itemClickListener != null) {
-                    itemClickListener.onItemClick(dayCell.year, dayCell.month, dayCell.day);
+                    itemClickListener.onItemClick(MonthLayout.this, dayCell.year, dayCell.month, dayCell.day);
                 }
                 return true;
             } else {
@@ -413,7 +444,7 @@ public class MonthLayout extends View {
             float x = e.getX();
             float y = e.getY();
             dayCell = getClickCell(x, y);
-            return dayCell != null;
+            return dayCell != null && (showRelativeMonth || dayCell.year == year && dayCell.month == month);
         }
     }
 
@@ -472,10 +503,19 @@ public class MonthLayout extends View {
         /**
          * item 点击
          *
+         * @param monthLayout view
          * @param year  年
          * @param month 月
          * @param day   日
          */
-        void onItemClick(int year, int month, int day);
+        void onItemClick(MonthLayout monthLayout, int year, int month, int day);
+    }
+
+    void setInitListener(InitListener initListener) {
+        this.initListener = initListener;
+    }
+
+    interface InitListener{
+        void onInitFinish();
     }
 }

@@ -4,14 +4,23 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context="com.ray.calendartomtaw.MainActivity">
+
+    <com.ray.widget.calendar.CalendarView
+        android:id="@+id/calendar_layout"
+        android:layout_width="match_parent"
+        app:cv_title_layout="@layout/widget_calendar_title_layout2"
+        android:layout_height="300dp" />
+
+    <com.ray.widget.calendar.MonthLabelView
+        android:id="@+id/label_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 
     <com.ray.widget.calendar.MonthLayout
         android:id="@+id/month_layout"
-        android:layout_width="wrap_content"
-        android:layout_height="400dp"
-        android:background="#bbb"
-        app:ml_weekLabelHeight="30dp"
-        />
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 
 </LinearLayout>

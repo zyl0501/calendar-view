@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <item name="cv_cal_left_img" type="id"/>
+    <item name="cv_cal_year_month_tv" type="id"/>
+    <item name="cv_cal_right_img" type="id"/>
+</resources>
