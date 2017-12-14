@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="ml_primaryColor">#1c8be4</color>
+    <color name="ml_weekLabelColor">#333333</color>
+    <color name="ml_selectTextColor">#ffffff</color>
+    <dimen name="ml_textSize">13sp</dimen>
+    <dimen name="ml_weekLabelSize">13sp</dimen>
+    <dimen name="ml_dotSize">4dp</dimen>
+    <dimen name="ml_dotMargin">5dp</dimen>
+    <dimen name="ml_dotMarginText">3dp</dimen>
+    <string-array name="ml_weeks">
+        <item>日</item>
+        <item>一</item>
+        <item>二</item>
+        <item>三</item>
+        <item>四</item>
+        <item>五</item>
+        <item>六</item>
+    </string-array>
+</resources>

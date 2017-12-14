@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="MonthLayout">
+        <attr name="ml_primaryColor" format="color|reference"/>
+        <attr name="ml_selectTextColor" format="color|reference"/>
+        <attr name="ml_weekLabelColor" format="color|reference"/>
+        <attr name="ml_textSize" format="dimension"/>
+        <attr name="ml_weekLabelSize" format="dimension"/>
+        <attr name="ml_cellSize" format="dimension"/>
+        <attr name="ml_dotSize" format="dimension"/>
+        <attr name="ml_dotMargin" format="dimension"/>
+        <attr name="ml_dotMarginText" format="dimension"/>
+        <attr name="ml_weeksArray"  format="reference"/>
+        <attr name="ml_weekLabelHeight"  format="dimension"/>
+        <attr name="ml_firstWeek" format="enum">
+            <enum name="sunday" value="1"/>
+            <enum name="monday" value="2"/>
+            <enum name="tuesday" value="3"/>
+            <enum name="wednesday" value="4"/>
+            <enum name="thursday" value="5"/>
+            <enum name="friday" value="6"/>
+            <enum name="saturday" value="7"/>
+        </attr>
+    </declare-styleable>
+</resources>
