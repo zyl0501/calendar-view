@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
+import android.widget.Toast;
 
 import com.ray.widget.calendar.CalendarView;
 import com.ray.widget.calendar.MonthLabelView;
@@ -33,6 +34,11 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onYearMonthClick(View view) {
                 return false;
+            }
+
+            @Override
+            public void onChangeMonth(int newYear, int newMonth) {
+                Toast.makeText(MainActivity.this, String.format(Locale.getDefault(), "%02d-%02d", newYear, newMonth),Toast.LENGTH_SHORT).show();
             }
 
             @Override

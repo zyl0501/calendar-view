@@ -127,6 +127,7 @@ public class CalendarView extends LinearLayout {
                 int year = yearMonth.first;
                 int month = yearMonth.second;
                 if (callBack != null) {
+                    callBack.onChangeMonth(year, month);
                     yearMonthTv.setText(callBack.getShowText(year, month));
                 } else {
                     yearMonthTv.setText(String.format(Locale.getDefault(), "%02d-%02d", year, month));
@@ -340,6 +341,13 @@ public class CalendarView extends LinearLayout {
          * @return 是否消耗掉本次点击，false 表示不消耗，会显示默认的
          */
         boolean onYearMonthClick(View view);
+
+        /**
+         * 显示内容变化的时候
+         * @param newYear new year
+         * @param newMonth new  month
+         */
+        void onChangeMonth(int newYear, int newMonth);
 
         /**
          * 显示年月
