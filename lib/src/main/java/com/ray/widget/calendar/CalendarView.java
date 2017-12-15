@@ -188,7 +188,7 @@ public class CalendarView extends LinearLayout {
         monthLayout.setItemClickListener(new MonthLayout.ItemClickListener() {
             @Override
             public void onItemClick(MonthLayout monthLayout, int year, int month, int day) {
-                if (callBack != null && callBack.onDatePick(year, month, day)) {
+                if (callBack == null || !callBack.onDatePick(year, month, day)) {
                     setSelectDate(year, month, day);
                 }
             }
