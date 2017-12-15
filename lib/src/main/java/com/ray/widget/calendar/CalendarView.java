@@ -1,17 +1,21 @@
 package com.ray.widget.calendar;
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.res.TypedArray;
 import android.support.annotation.Nullable;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
+import android.util.Pair;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.NumberPicker;
 import android.widget.TextView;
 
 import java.util.Calendar;
@@ -33,8 +37,9 @@ public class CalendarView extends LinearLayout {
     int titleLayoutRes;
 
     Calendar selectCal;
+    Calendar tempCal;
     SparseArray<MonthLayout> cacheMonthLayouts;
-    OnDatePickListener onDatePickListener;
+    CallBack callBack;
 
     public CalendarView(Context context) {
         this(context, null);
@@ -56,6 +61,7 @@ public class CalendarView extends LinearLayout {
 
     private void init() {
         selectCal = Calendar.getInstance();
+        tempCal = Calendar.getInstance();
         cacheMonthLayouts = new SparseArray<>();
         setOrientation(VERTICAL);
         addTitleLayout();
@@ -75,18 +81,22 @@ public class CalendarView extends LinearLayout {
         leftImg.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                viewPager.setCurrentItem(viewPager.getCurrentItem() - 1, true);
+                goPreMonth();
             }
         });
         rightImg.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                viewPager.setCurrentItem(viewPager.getCurrentItem() + 1, true);
+                goNextMonth();
             }
         });
         yearMonthTv.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (callBack == null || !callBack.onYearMonthClick(v)) {
+                    Pair<Integer, Integer> yearMonth = getPositionYearMonth(viewPager.getCurrentItem());
+                    showDefaultMonthPickDialog(yearMonth.first, yearMonth.second);
+                }
             }
         });
     }
@@ -111,10 +121,10 @@ public class CalendarView extends LinearLayout {
 
             @Override
             public void onPageSelected(int position) {
-                int realPos = getRealPosition(position);
-                Calendar calendar = Calendar.getInstance();
-                calendar.add(Calendar.MONTH, realPos);
-                yearMonthTv.setText(String.valueOf(calendar.get(Calendar.YEAR)) + "-" + String.valueOf(calendar.get(Calendar.MONTH) + 1));
+                Pair<Integer, Integer> yearMonth = getPositionYearMonth(position);
+                int year = yearMonth.first;
+                int month = yearMonth.second;
+                yearMonthTv.setText(year + "-" + String.valueOf(month + 1));
             }
 
             @Override
@@ -134,24 +144,11 @@ public class CalendarView extends LinearLayout {
 
             @Override
             public Object instantiateItem(ViewGroup container, int position) {
-                int realPos = getRealPosition(position);
-                Calendar calendar = Calendar.getInstance();
-                calendar.add(Calendar.MONTH, realPos);
+                Pair<Integer, Integer> yearMonth = getPositionYearMonth(position);
+                int year = yearMonth.first;
+                int month = yearMonth.second;
 
-                final MonthLayout monthLayout = (MonthLayout) inflater.inflate(R.layout.widget_calendar_month_layout, viewPager, false);
-                int year = calendar.get(Calendar.YEAR);
-                int month = calendar.get(Calendar.MONTH);
-                monthLayout.setSelectDay(selectCal.get(Calendar.YEAR), selectCal.get(Calendar.MONTH), selectCal.get(Calendar.DAY_OF_MONTH));
-                monthLayout.setDate(year, month);
-                monthLayout.setItemClickListener(new MonthLayout.ItemClickListener() {
-                    @Override
-                    public void onItemClick(MonthLayout monthLayout, int year, int month, int day) {
-                        select(year, month, day);
-                        if (onDatePickListener != null) {
-                            onDatePickListener.onDatePick(year, month, day);
-                        }
-                    }
-                });
+                MonthLayout monthLayout = generateMonthLayout(year, month);
                 container.addView(monthLayout);
                 if (monthLabelView != null && monthLabelView.getMonthLayout() == null) {
                     monthLabelView.setupWith(monthLayout);
@@ -177,7 +174,91 @@ public class CalendarView extends LinearLayout {
         return position - BEGIN_POSITION;
     }
 
-    public void select(int year, int month, int day) {
+    /**
+     * 根据年月生成要显示{@link MonthLayout}
+     *
+     * @param year  年
+     * @param month 月
+     * @return {@link MonthLayout}
+     */
+    private MonthLayout generateMonthLayout(int year, int month) {
+        final MonthLayout monthLayout = (MonthLayout) inflater.inflate(R.layout.widget_calendar_month_layout, viewPager, false);
+        monthLayout.setDate(year, month);
+        monthLayout.setSelectDay(selectCal.get(Calendar.YEAR), selectCal.get(Calendar.MONTH), selectCal.get(Calendar.DAY_OF_MONTH));
+        monthLayout.setItemClickListener(new MonthLayout.ItemClickListener() {
+            @Override
+            public void onItemClick(MonthLayout monthLayout, int year, int month, int day) {
+                if (callBack != null && callBack.onDatePick(year, month, day)) {
+                    setSelectDate(year, month, day);
+                }
+            }
+        });
+        monthLayout.setCallBack(new MonthLayout.CallBack() {
+            @Override
+            public int[] getDots(int year, int month, int day) {
+                if (callBack != null) {
+                    return callBack.getDots(year, month, day);
+                } else {
+                    return null;
+                }
+            }
+        });
+        return monthLayout;
+    }
+
+    private Pair<Integer, Integer> getPositionYearMonth(int position) {
+        tempCal.setTimeInMillis(System.currentTimeMillis());
+        tempCal.add(Calendar.MONTH, getRealPosition(position));
+        return new Pair<>(tempCal.get(Calendar.YEAR), tempCal.get(Calendar.MONTH));
+    }
+
+    private void showDefaultMonthPickDialog(int initYear, int initMonth) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+        if (inflater == null) {
+            inflater = LayoutInflater.from(getContext());
+        }
+
+        Calendar cal = Calendar.getInstance();
+
+        View dialog = inflater.inflate(R.layout.widget_calendar_default_year_month_pick, null);
+        final NumberPicker monthPicker = dialog.findViewById(R.id.picker_month);
+        final NumberPicker yearPicker = dialog.findViewById(R.id.picker_year);
+
+        monthPicker.setMinValue(1);
+        monthPicker.setMaxValue(12);
+        monthPicker.setValue(initMonth + 1);
+
+        int year = cal.get(Calendar.YEAR);
+        yearPicker.setMinValue(year - 50);
+        yearPicker.setMaxValue(year + 50);
+        yearPicker.setValue(initYear);
+
+        builder.setView(dialog)
+                // Add action buttons
+                .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        setMonth(yearPicker.getValue(), monthPicker.getValue() - 1);
+                        dialog.dismiss();
+                    }
+                })
+                .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int id) {
+                        dialog.dismiss();
+                    }
+                });
+        builder.show();
+    }
+
+    /**
+     * 设置选中的日期
+     *
+     * @param year  年
+     * @param month 月
+     * @param day   日
+     */
+    public void setSelectDate(int year, int month, int day) {
         selectCal.set(year, month, day);
         if (cacheMonthLayouts != null) {
             for (int i = 0, size = cacheMonthLayouts.size(); i < size; i++) {
@@ -186,11 +267,60 @@ public class CalendarView extends LinearLayout {
         }
     }
 
-    public void setOnDatePickListener(OnDatePickListener onDatePickListener) {
-        this.onDatePickListener = onDatePickListener;
+    /**
+     * 设置显示月份
+     *
+     * @param year  年
+     * @param month 月
+     */
+    public void setMonth(int year, int month) {
+        //当前系统的时间
+        tempCal.setTimeInMillis(System.currentTimeMillis());
+        int curYear = tempCal.get(Calendar.YEAR);
+        int curMonth = tempCal.get(Calendar.MONTH);
+        int monthDiff = getMonthDiff(year, month, curYear, curMonth);
+        viewPager.setCurrentItem(BEGIN_POSITION + monthDiff, true);
     }
 
-    public interface OnDatePickListener {
-        void onDatePick(int year, int month, int day);
+    /**
+     * 获取两个日期相差的月数
+     *
+     * @return 如果 date1 > date2，返回正数，反则相等，返回0，否则返回负数
+     */
+    public static int getMonthDiff(int year1, int month1, int year2, int month2) {
+        int diffYear = year1 - year2;
+        return diffYear * 12 + month1 - month2;
+    }
+
+    public void goPreMonth() {
+        viewPager.setCurrentItem(viewPager.getCurrentItem() - 1, true);
+    }
+
+    public void goNextMonth() {
+        viewPager.setCurrentItem(viewPager.getCurrentItem() + 1, true);
+    }
+
+    public void setCallBack(CallBack callBack) {
+        this.callBack = callBack;
+    }
+
+    public interface CallBack extends MonthLayout.CallBack {
+        /**
+         * 日期选择的时候
+         *
+         * @param year  年
+         * @param month 月
+         * @param day   日
+         * @return true 表示选中，false 不触发选中
+         */
+        boolean onDatePick(int year, int month, int day);
+
+        /**
+         * 年月点击事件
+         *
+         * @param view view
+         * @return 是否消耗掉本次点击，false 表示不消耗，会显示默认的
+         */
+        boolean onYearMonthClick(View view);
     }
 }

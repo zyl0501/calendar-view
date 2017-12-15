@@ -1,17 +1,10 @@
 package com.ray.calendartomtaw;
 
 import android.graphics.Color;
-import android.support.v4.view.PagerAdapter;
-import android.support.v4.view.ViewPager;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
+import android.support.v7.app.AppCompatActivity;
 
-import com.ray.widget.calendar.CalendarView;
+import com.ray.widget.calendar.MonthLabelView;
 import com.ray.widget.calendar.MonthLayout;
 
 import java.util.Calendar;
@@ -24,39 +17,42 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        CalendarView calendarView = findViewById(R.id.calendar_layout);
-        calendarView.setOnDatePickListener(new CalendarView.OnDatePickListener() {
+//        CalendarView calendarView = findViewById(R.id.calendar_layout);
+//        calendarView.setOnDatePickListener(new CalendarView.OnDatePickListener() {
+//            @Override
+//            public void onDatePick(int year, int month, int day) {
+//                Log.d("raytest", year + "-" + month + "-" + day);
+//            }
+//        });
+
+        final MonthLayout monthLayout = findViewById(R.id.month_layout);
+        MonthLabelView labelView = findViewById(R.id.label_layout);
+        labelView.setupWith(monthLayout);
+
+        Calendar cal = Calendar.getInstance();
+        monthLayout.setDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH));
+        monthLayout.setCallBack(new MonthLayout.CallBack() {
             @Override
-            public void onDatePick(int year, int month, int day) {
-                Log.d("raytest", year + "-" + month + "-" + day);
+            public int[] getDots(int year, int month, int day) {
+                if (day % 7 == 0) {
+                    return new int[]{
+                            Color.parseColor("#ff6f6f"), Color.parseColor("#1c8be4"),
+                    };
+                }
+                if (day % 7 == 2) {
+                    return new int[]{
+                            Color.parseColor("#ff6f6f")
+                    };
+                }
+                return null;
             }
         });
-
-//        final MonthLayout monthLayout = findViewById(R.id.month_layout);
-//        Calendar cal = Calendar.getInstance();
-//        monthLayout.setDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH));
-//        monthLayout.setCallBack(new MonthLayout.CallBack() {
-//            @Override
-//            public int[] getDots(int year, int month, int day) {
-//                if (day % 7 == 0) {
-//                    return new int[]{
-//                            Color.parseColor("#ff6f6f"), Color.parseColor("#1c8be4"),
-//                    };
-//                }
-//                if (day % 7 == 2) {
-//                    return new int[]{
-//                            Color.parseColor("#ff6f6f")
-//                    };
-//                }
-//                return null;
-//            }
-//        });
-//        monthLayout.setItemClickListener(new MonthLayout.ItemClickListener() {
-//            @Override
-//            public void onItemClick(int year, int month, int day) {
-//                monthLayout.setSelectDay(year, month, day);
-//            }
-//        });
+        monthLayout.setItemClickListener(new MonthLayout.ItemClickListener() {
+            @Override
+            public void onItemClick(MonthLayout layout, int year, int month, int day) {
+                layout.setSelectDay(year, month, day);
+            }
+        });
     }
 
     private int getRealPosition(int position) {

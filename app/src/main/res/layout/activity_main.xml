@@ -11,6 +11,7 @@
         android:id="@+id/calendar_layout"
         android:layout_width="match_parent"
         app:cv_title_layout="@layout/widget_calendar_title_layout2"
+        android:visibility="visible"
         android:layout_height="300dp" />
 
     <com.ray.widget.calendar.MonthLabelView
