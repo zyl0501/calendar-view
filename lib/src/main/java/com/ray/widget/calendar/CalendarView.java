@@ -19,6 +19,7 @@ import android.widget.NumberPicker;
 import android.widget.TextView;
 
 import java.util.Calendar;
+import java.util.Locale;
 
 /**
  * @author zyl
@@ -29,6 +30,7 @@ public class CalendarView extends LinearLayout {
     private static final int BEGIN_POSITION = MAX_POSITION / 2;
 
     ViewPager viewPager;
+    PagerAdapter pagerAdapter;
     ImageView leftImg;
     ImageView rightImg;
     TextView yearMonthTv;
@@ -124,14 +126,18 @@ public class CalendarView extends LinearLayout {
                 Pair<Integer, Integer> yearMonth = getPositionYearMonth(position);
                 int year = yearMonth.first;
                 int month = yearMonth.second;
-                yearMonthTv.setText(year + "-" + String.valueOf(month + 1));
+                if (callBack != null) {
+                    yearMonthTv.setText(callBack.getShowText(year, month));
+                } else {
+                    yearMonthTv.setText(String.format(Locale.getDefault(), "%02d-%02d", year, month));
+                }
             }
 
             @Override
             public void onPageScrollStateChanged(int state) {
             }
         });
-        viewPager.setAdapter(new PagerAdapter() {
+        pagerAdapter = new PagerAdapter() {
             @Override
             public int getCount() {
                 return MAX_POSITION;
@@ -162,7 +168,8 @@ public class CalendarView extends LinearLayout {
                 cacheMonthLayouts.remove(position);
                 container.removeView((View) object);
             }
-        });
+        };
+        viewPager.setAdapter(pagerAdapter);
         viewPager.setCurrentItem(BEGIN_POSITION, false);
 
         LayoutParams lp = generateDefaultLayoutParams();
@@ -183,8 +190,6 @@ public class CalendarView extends LinearLayout {
      */
     private MonthLayout generateMonthLayout(int year, int month) {
         final MonthLayout monthLayout = (MonthLayout) inflater.inflate(R.layout.widget_calendar_month_layout, viewPager, false);
-        monthLayout.setDate(year, month);
-        monthLayout.setSelectDay(selectCal.get(Calendar.YEAR), selectCal.get(Calendar.MONTH), selectCal.get(Calendar.DAY_OF_MONTH));
         monthLayout.setItemClickListener(new MonthLayout.ItemClickListener() {
             @Override
             public void onItemClick(MonthLayout monthLayout, int year, int month, int day) {
@@ -203,6 +208,8 @@ public class CalendarView extends LinearLayout {
                 }
             }
         });
+        monthLayout.setDate(year, month);
+        monthLayout.setSelectDay(selectCal.get(Calendar.YEAR), selectCal.get(Calendar.MONTH), selectCal.get(Calendar.DAY_OF_MONTH));
         return monthLayout;
     }
 
@@ -282,6 +289,17 @@ public class CalendarView extends LinearLayout {
         viewPager.setCurrentItem(BEGIN_POSITION + monthDiff, true);
     }
 
+    public void notifyChanged() {
+//        if (pagerAdapter != null) {
+//            pagerAdapter.notifyDataSetChanged();
+//        }
+        if (cacheMonthLayouts != null) {
+            for (int i = 0, size = cacheMonthLayouts.size(); i < size; i++) {
+                cacheMonthLayouts.valueAt(i).refresh();
+            }
+        }
+    }
+
     /**
      * 获取两个日期相差的月数
      *
@@ -322,5 +340,14 @@ public class CalendarView extends LinearLayout {
          * @return 是否消耗掉本次点击，false 表示不消耗，会显示默认的
          */
         boolean onYearMonthClick(View view);
+
+        /**
+         * 显示年月
+         *
+         * @param year  年
+         * @param month 月
+         * @return 根据年月显示内容
+         */
+        CharSequence getShowText(int year, int month);
     }
 }

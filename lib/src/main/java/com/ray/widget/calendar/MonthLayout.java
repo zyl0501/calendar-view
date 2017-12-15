@@ -337,6 +337,10 @@ public class MonthLayout extends View {
     public void setDate(int year, int month) {
         this.year = year;
         this.month = month;
+        refresh();
+    }
+
+    public void refresh() {
         if (calendar == null) {
             calendar = Calendar.getInstance();
         }
@@ -504,9 +508,9 @@ public class MonthLayout extends View {
          * item 点击
          *
          * @param monthLayout view
-         * @param year  年
-         * @param month 月
-         * @param day   日
+         * @param year        年
+         * @param month       月
+         * @param day         日
          */
         void onItemClick(MonthLayout monthLayout, int year, int month, int day);
     }
@@ -515,7 +519,7 @@ public class MonthLayout extends View {
         this.initListener = initListener;
     }
 
-    interface InitListener{
+    interface InitListener {
         void onInitFinish();
     }
 }
