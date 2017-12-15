@@ -4,6 +4,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
@@ -38,7 +39,8 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onChangeMonth(int newYear, int newMonth) {
-                Toast.makeText(MainActivity.this, String.format(Locale.getDefault(), "%02d-%02d", newYear, newMonth),Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, String.format(Locale.getDefault(), "%02d-%02d", newYear, newMonth), Toast.LENGTH_SHORT).show();
+                Log.d("raytest", calendarView.getSelectDate().get(Calendar.YEAR) + "-" + calendarView.getSelectDate().get(Calendar.MONTH) + "-" + calendarView.getSelectDate().get(Calendar.DAY_OF_MONTH));
             }
 
             @Override
@@ -48,9 +50,9 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public int[] getDots(int year, int month, int day) {
-                if(day == dotNumber){
+                if (day == dotNumber) {
                     return new int[]{Color.BLUE};
-                }else {
+                } else {
                     return new int[0];
                 }
             }
@@ -61,7 +63,9 @@ public class MainActivity extends AppCompatActivity {
                 dotNumber = 12;
                 calendarView.notifyChanged();
             }
-        },3000);
+        }, 3000);
+
+        Log.d("raytest", calendarView.getShowYearMonth().first + "-" + calendarView.getShowYearMonth().second);
 
         final MonthLayout monthLayout = findViewById(R.id.month_layout);
         MonthLabelView labelView = findViewById(R.id.label_layout);

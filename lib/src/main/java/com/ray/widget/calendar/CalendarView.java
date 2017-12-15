@@ -62,7 +62,6 @@ public class CalendarView extends LinearLayout {
     }
 
     private void init() {
-        selectCal = Calendar.getInstance();
         tempCal = Calendar.getInstance();
         cacheMonthLayouts = new SparseArray<>();
         setOrientation(VERTICAL);
@@ -210,7 +209,9 @@ public class CalendarView extends LinearLayout {
             }
         });
         monthLayout.setDate(year, month);
-        monthLayout.setSelectDay(selectCal.get(Calendar.YEAR), selectCal.get(Calendar.MONTH), selectCal.get(Calendar.DAY_OF_MONTH));
+        if (selectCal != null) {
+            monthLayout.setSelectDay(selectCal.get(Calendar.YEAR), selectCal.get(Calendar.MONTH), selectCal.get(Calendar.DAY_OF_MONTH));
+        }
         return monthLayout;
     }
 
@@ -267,6 +268,9 @@ public class CalendarView extends LinearLayout {
      * @param day   日
      */
     public void setSelectDate(int year, int month, int day) {
+        if (selectCal == null) {
+            selectCal = Calendar.getInstance();
+        }
         selectCal.set(year, month, day);
         if (cacheMonthLayouts != null) {
             for (int i = 0, size = cacheMonthLayouts.size(); i < size; i++) {
@@ -306,9 +310,17 @@ public class CalendarView extends LinearLayout {
      *
      * @return 如果 date1 > date2，返回正数，反则相等，返回0，否则返回负数
      */
-    public static int getMonthDiff(int year1, int month1, int year2, int month2) {
+    static int getMonthDiff(int year1, int month1, int year2, int month2) {
         int diffYear = year1 - year2;
         return diffYear * 12 + month1 - month2;
+    }
+
+    public Pair<Integer, Integer> getShowYearMonth() {
+        return getPositionYearMonth(viewPager.getCurrentItem());
+    }
+
+    public Calendar getSelectDate() {
+        return selectCal == null ? null : (Calendar) selectCal.clone();
     }
 
     public void goPreMonth() {
@@ -344,7 +356,8 @@ public class CalendarView extends LinearLayout {
 
         /**
          * 显示内容变化的时候
-         * @param newYear new year
+         *
+         * @param newYear  new year
          * @param newMonth new  month
          */
         void onChangeMonth(int newYear, int newMonth);
