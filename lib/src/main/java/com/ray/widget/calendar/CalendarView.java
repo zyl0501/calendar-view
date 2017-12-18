@@ -18,6 +18,8 @@ import android.widget.LinearLayout;
 import android.widget.NumberPicker;
 import android.widget.TextView;
 
+import com.ray.widget.viewpager.NoLimitViewPager;
+
 import java.util.Calendar;
 import java.util.Locale;
 
@@ -26,7 +28,7 @@ import java.util.Locale;
  * @date Created on 2017/12/14
  */
 public class CalendarView extends LinearLayout {
-    private static final int MAX_POSITION = Integer.MAX_VALUE;
+    private static final int MAX_POSITION = Integer.MAX_VALUE - 3;
     private static final int BEGIN_POSITION = MAX_POSITION / 2;
 
     ViewPager viewPager;
@@ -114,7 +116,7 @@ public class CalendarView extends LinearLayout {
         if (inflater == null) {
             inflater = LayoutInflater.from(getContext());
         }
-        viewPager = new ViewPager(getContext());
+        viewPager = new NoLimitViewPager(getContext());
         viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
@@ -295,9 +297,6 @@ public class CalendarView extends LinearLayout {
     }
 
     public void notifyChanged() {
-//        if (pagerAdapter != null) {
-//            pagerAdapter.notifyDataSetChanged();
-//        }
         if (cacheMonthLayouts != null) {
             for (int i = 0, size = cacheMonthLayouts.size(); i < size; i++) {
                 cacheMonthLayouts.valueAt(i).refresh();

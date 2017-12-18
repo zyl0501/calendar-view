@@ -15,6 +15,10 @@ import com.ray.widget.calendar.MonthLayout;
 import java.util.Calendar;
 import java.util.Locale;
 
+/**
+ * main test
+ * @author ray
+ */
 public class MainActivity extends AppCompatActivity {
     private static final int MAX_POSITION = 20;
     private static final int BEGIN_POSITION = MAX_POSITION / 2;
@@ -40,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onChangeMonth(int newYear, int newMonth) {
                 Toast.makeText(MainActivity.this, String.format(Locale.getDefault(), "%02d-%02d", newYear, newMonth), Toast.LENGTH_SHORT).show();
-                Log.d("raytest", calendarView.getSelectDate().get(Calendar.YEAR) + "-" + calendarView.getSelectDate().get(Calendar.MONTH) + "-" + calendarView.getSelectDate().get(Calendar.DAY_OF_MONTH));
+//                Log.d("raytest", calendarView.getSelectDate().get(Calendar.YEAR) + "-" + calendarView.getSelectDate().get(Calendar.MONTH) + "-" + calendarView.getSelectDate().get(Calendar.DAY_OF_MONTH));
             }
 
             @Override
