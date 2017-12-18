@@ -131,7 +131,7 @@ public class CalendarView extends LinearLayout {
                     callBack.onChangeMonth(year, month);
                     yearMonthTv.setText(callBack.getShowText(year, month));
                 } else {
-                    yearMonthTv.setText(String.format(Locale.getDefault(), "%02d-%02d", year, month));
+                    yearMonthTv.setText(String.format(Locale.getDefault(), "%02d-%02d", year, month + 1));
                 }
             }
 
