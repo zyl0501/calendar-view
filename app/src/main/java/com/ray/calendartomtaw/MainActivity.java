@@ -49,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public CharSequence getShowText(int year, int month) {
-                return String.format(Locale.getDefault(), "%02d-%02d", year, month);
+                return String.format(Locale.getDefault(), "%02d----%02d", year, month);
             }
 
             @Override
@@ -61,6 +61,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+//        calendarView.notifyChanged();
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {

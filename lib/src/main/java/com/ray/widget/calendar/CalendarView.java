@@ -124,15 +124,7 @@ public class CalendarView extends LinearLayout {
 
             @Override
             public void onPageSelected(int position) {
-                Pair<Integer, Integer> yearMonth = getPositionYearMonth(position);
-                int year = yearMonth.first;
-                int month = yearMonth.second;
-                if (callBack != null) {
-                    callBack.onChangeMonth(year, month);
-                    yearMonthTv.setText(callBack.getShowText(year, month));
-                } else {
-                    yearMonthTv.setText(String.format(Locale.getDefault(), "%02d-%02d", year, month + 1));
-                }
+                notifyTitleChanged(position);
             }
 
             @Override
@@ -302,6 +294,19 @@ public class CalendarView extends LinearLayout {
                 cacheMonthLayouts.valueAt(i).refresh();
             }
         }
+        notifyTitleChanged(viewPager.getCurrentItem());
+    }
+
+    public void notifyTitleChanged(int position){
+        Pair<Integer, Integer> yearMonth = getPositionYearMonth(position);
+        int year = yearMonth.first;
+        int month = yearMonth.second;
+        if (callBack != null) {
+            callBack.onChangeMonth(year, month);
+            yearMonthTv.setText(callBack.getShowText(year, month));
+        } else {
+            yearMonthTv.setText(String.format(Locale.getDefault(), "%02d-%02d", year, month + 1));
+        }
     }
 
     /**
@@ -332,6 +337,7 @@ public class CalendarView extends LinearLayout {
 
     public void setCallBack(CallBack callBack) {
         this.callBack = callBack;
+        notifyChanged();
     }
 
     public interface CallBack extends MonthLayout.CallBack {
