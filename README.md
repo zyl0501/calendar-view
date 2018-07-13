@@ -19,7 +19,7 @@ dependencies {
 }
 ```
 
-1.CalendarView
+## CalendarView
 ```xml
     <com.ray.widget.calendar.CalendarView
         android:id="@+id/calendar_layout"
@@ -47,7 +47,7 @@ Method | Summary
 `int[] getDots(int year, int month, int day)` | 返回具体日期下的标记点颜色
 
 
-2.MonthLayout
+## MonthLayout
 
 Styleable | Summary
 --- | ---
