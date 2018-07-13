@@ -347,7 +347,7 @@ public class CalendarView extends LinearLayout {
          * @param year  年
          * @param month 月
          * @param day   日
-         * @return true 表示选中，false 不触发选中
+         * @return 是否消耗掉本次点击，false 表示不消耗
          */
         boolean onDatePick(int year, int month, int day);
 
