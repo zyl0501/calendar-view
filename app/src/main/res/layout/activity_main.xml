@@ -1,27 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:context="com.ray.calendartomtaw.MainActivity">
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent"
+              android:orientation="vertical"
+              tools:context="com.ray.calendartomtaw.MainActivity">
 
     <com.ray.widget.calendar.CalendarView
         android:id="@+id/calendar_layout"
         android:layout_width="match_parent"
-        app:cv_title_layout="@layout/widget_calendar_title_layout2"
+        android:layout_height="300dp"
         android:visibility="visible"
-        android:layout_height="300dp" />
+        app:cv_title_layout="@layout/widget_calendar_title_layout2"/>
 
     <com.ray.widget.calendar.MonthLabelView
         android:id="@+id/label_layout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        />
 
     <com.ray.widget.calendar.MonthLayout
         android:id="@+id/month_layout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:visibility="gone"/>
 
 </LinearLayout>

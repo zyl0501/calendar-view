@@ -43,13 +43,13 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onChangeMonth(int newYear, int newMonth) {
-                Toast.makeText(MainActivity.this, String.format(Locale.getDefault(), "%02d-%02d", newYear, newMonth), Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, String.format(Locale.getDefault(), "%02d-%02d", newYear, newMonth+1), Toast.LENGTH_SHORT).show();
 //                Log.d("raytest", calendarView.getSelectDate().get(Calendar.YEAR) + "-" + calendarView.getSelectDate().get(Calendar.MONTH) + "-" + calendarView.getSelectDate().get(Calendar.DAY_OF_MONTH));
             }
 
             @Override
             public CharSequence getShowText(int year, int month) {
-                return String.format(Locale.getDefault(), "%02d----%02d", year, month);
+                return String.format(Locale.getDefault(), "%02d----%02d", year, month+1);
             }
 
             @Override
